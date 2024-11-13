@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>시간표 추천 프로그램</title>
+    <style>
+        .container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .courses-list, .selected-courses {
+            width: 45%;
+        }
+        .course-item {
+            cursor: pointer;
+        }
+        .course-item:hover {
+            background-color: #f0f0f0;
+        }
+        .selected-course {
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>시간표 추천 프로그램</h1>
+    
+    <input type="text" id="searchInput" placeholder="과목명을 입력하세요" />
+    <button id="searchButton">검색</button>
+    
+    <div class="container">
+        <div class="courses-list">
+            <h2>전공 과목</h2>
+            <ul id="majorCoursesList"></ul>
+
+            <h2>교양 과목</h2>
+            <ul id="otherCoursesList"></ul>
+        </div>
+
+        <div class="selected-courses">
+            <h2>선택된 과목</h2>
+            <ul id="selectedCoursesList"></ul>
+        </div>
+    </div>
+    
+    <button id="nextStepButton">다음 단계</button>
+
+    <script>
+        document.getElementById('searchButton').addEventListener('click', function() {
+            var query = document.getElementById('searchInput').value;
+            
+            fetch('/search_courses?query=' + query)
+                .then(response => response.json())
+                .then(data => {
+                    var majorCoursesList = document.getElementById('majorCoursesList');
+                    majorCoursesList.innerHTML = '';
+                    data.major_courses.forEach(course => {
+                        var li = document.createElement('li');
+                        li.classList.add('course-item');
+                        li.addEventListener('click', () => addToSelected(course));
+
+                        li.innerHTML = `
+                            <strong>과목명:</strong> ${course.name} <br>
+                            <strong>교수:</strong> ${course.prof} <br>
+                            <strong>학점:</strong> ${course.grade} <br>
+                            <strong>강의 시간:</strong> ${course.time} <br>
+                        `;
+                        majorCoursesList.appendChild(li);
+                    });
+
+                    var otherCoursesList = document.getElementById('otherCoursesList');
+                    otherCoursesList.innerHTML = '';
+                    data.other_courses.forEach(course => {
+                        var li = document.createElement('li');
+                        li.classList.add('course-item');
+                        li.addEventListener('click', () => addToSelected(course));
+
+                        li.innerHTML = `
+                            <strong>과목명:</strong> ${course.name} <br>
+                            <strong>교수:</strong> ${course.prof} <br>
+                            <strong>학점:</strong> ${course.grade} <br>
+                            <strong>강의 시간:</strong> ${course.time} <br>
+                        `;
+                        otherCoursesList.appendChild(li);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        });
+
+        function addToSelected(course) {
+            fetch('/add_course', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(course)
+            });
+
+            var selectedCoursesList = document.getElementById('selectedCoursesList');
+            var li = document.createElement('li');
+            li.classList.add('selected-course');
+            li.innerHTML = `
+                <strong>과목명:</strong> ${course.name} <br>
+                <strong>교수:</strong> ${course.prof} <br>
+                <strong>학점:</strong> ${course.grade} <br>
+                <strong>강의 시간:</strong> ${course.time} <br>
+            `;
+
+            var deleteButton = document.createElement('button');
+            deleteButton.textContent = '삭제';
+            deleteButton.addEventListener('click', function() {
+                selectedCoursesList.removeChild(li);
+            });
+
+            li.appendChild(deleteButton);
+            selectedCoursesList.appendChild(li);
+        }
+
+        document.getElementById('nextStepButton').addEventListener('click', function() {
+            window.location.href = '/next_step';
+        });
+    </script>
+</body>
+</html>

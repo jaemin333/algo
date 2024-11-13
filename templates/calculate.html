@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>다음 단계 - 선택된 과목</title>
+</head>
+<body>
+    <h1>선택된 과목 정보</h1>
+    <ul>
+        {% for course in courses %}
+            <li>
+                <strong>과목명:</strong> {{ course['name'] }} <br>
+                <strong>교수:</strong> {{ course['prof'] }} <br>
+                <strong>학점:</strong> {{ course['grade'] }} <br>
+                <strong>강의 시간:</strong> {{ course['time'] }} <br>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
