@@ -25,7 +25,7 @@ def search_courses():
     
     filtered_major_courses = major_courses[major_courses['name'].str.contains(query, case=False)]
     filtered_other_courses = other_courses[other_courses['name'].str.contains(query, case=False)]
-    
+            
     major_courses_list = filtered_major_courses.to_dict(orient='records')
     other_courses_list = filtered_other_courses.to_dict(orient='records')
     

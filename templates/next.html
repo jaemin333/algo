@@ -45,8 +45,8 @@
         <!-- 카테고리 별 과목 수 입력 -->
         <h2>카테고리별 선택 과목 수</h2>
         <div class="input-group">
-            <label for="성균인성리더쉽">성균인성·리더쉽</label>
-            <input type="number" id="성균인성리더쉽" min="0" placeholder="과목 수를 입력하세요">
+            <label for="성균인성.리더쉽">성균인성·리더쉽</label>
+            <input type="number" id="성균인성.리더쉽" min="0" placeholder="과목 수를 입력하세요">
         </div>
         <div class="input-group">
             <label for="글로벌">글로벌</label>
@@ -61,20 +61,20 @@
             <input type="number" id="창의" min="0" placeholder="과목 수를 입력하세요">
         </div>
         <div class="input-group">
-            <label for="인문사회과학기반">인문사회과학/자연과학기반</label>
-            <input type="number" id="인문사회과학기반" min="0" placeholder="과목 수를 입력하세요">
+            <label for="인문사회/자연과학기반">인문사회과학/자연과학기반</label>
+            <input type="number" id="인문사회/자연과학기반" min="0" placeholder="과목 수를 입력하세요">
         </div>
         <div class="input-group">
-            <label for="인간문화">인간문화</label>
-            <input type="number" id="인간문화" min="0" placeholder="과목 수를 입력하세요">
+            <label for="인간/문화">인간문화</label>
+            <input type="number" id="인간/문화" min="0" placeholder="과목 수를 입력하세요">
         </div>
         <div class="input-group">
-            <label for="사회역사">사회역사</label>
-            <input type="number" id="사회역사" min="0" placeholder="과목 수를 입력하세요">
+            <label for="사회/역사">사회역사</label>
+            <input type="number" id="사회/역사" min="0" placeholder="과목 수를 입력하세요">
         </div>
         <div class="input-group">
-            <label for="자연과학기술">자연과학기술</label>
-            <input type="number" id="자연과학기술" min="0" placeholder="과목 수를 입력하세요">
+            <label for="자연/과학/기술">자연과학기술</label>
+            <input type="number" id="자연/과학/기술" min="0" placeholder="과목 수를 입력하세요">
         </div>
         <div class="input-group">
             <label for="교직">교직</label>
@@ -95,7 +95,7 @@
     <script>
        function submitSelection() {
         const desiredCourses = document.getElementById('desiredCourses').value.split(',').map(course => course.trim());
-        const categories = ["성균인성리더쉽", "글로벌", "의사소통", "창의", "인문사회과학기반", "인간문화", "사회역사", "자연과학기술", "교직"];
+        const categories = ["성균인성.리더쉽", "글로벌", "의사소통", "창의", "인문사회/자연과학기반", "인간/문화", "사회/역사", "자연/과학/기술", "교직"];
         let categorySelections = {};
         categories.forEach(category => {
             categorySelections[category] = parseInt(document.getElementById(category).value) || 0;
