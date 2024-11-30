@@ -1,40 +1,31 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>입력 정보 요약</title>
+    <title>Summary</title>
 </head>
 <body>
-    <h1>입력 정보 요약</h1>
-    
-    <h2>선택된 과목</h2>
-    <ul>
-        {% for course in courses %}
-        <li>
-            <strong>과목명:</strong> {{ course['name'] }} <br>
-            <strong>교수:</strong> {{ course['prof'] }} <br>
-            <strong>학점:</strong> {{ course['grade'] }} <br>
-            <strong>강의 시간:</strong> {{ course['time'] }} <br>
-        </li>
-        {% endfor %}
-    </ul>
+    <h1>시간표 요약</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>과목 이름</th>
+                <th>교수</th>
+                <th>시간</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for course in timetable %}
+                <tr>
+                    <td>{{ course['name'] }}</td>
+                    <td>{{ course['prof'] }}</td>
+                    <td>{{ course['time'] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-    <h2>듣고 싶은 과목</h2>
-    <ul>
-        {% for course in preferences.desired_courses %}
-        <li>{{ course }}</li>
-        {% endfor %}
-    </ul>
-
-    <h2>카테고리별 선택 과목 수</h2>
-    <ul>
-        {% for category, count in preferences.category_selections.items() %}
-        <li>{{ category }}: {{ count }}개</li>
-        {% endfor %}
-    </ul>
-    <h2>
-        불가능 시간대: {{preferences['unavailable_times']}}
-    </h2>
+    <form method="get" action="/summary">
+        <button type="submit">다른 시간표 생성</button>
+    </form>
 </body>
 </html>
