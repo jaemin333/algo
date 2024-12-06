@@ -3,6 +3,8 @@ import pandas as pd
 import re
 from datetime import datetime, time
 from flask import redirect, url_for, flash
+from itertools import product
+from random import shuffle
 
 app = Flask(__name__)
 
@@ -157,68 +159,85 @@ def summary():
     # 선택된 과목에 해당하는 major.CSV에서 시간대 가져오기
   
 
-    while True:
-        timetable = []
-        all_times = []  # 모든 과목 시간 저장 (요일/시간으로 구분)
+    
+    # 선택된 과목의 시간표 가져오기
+    selected_course_times = []
+    for course in selected_courses:
+        major_course = major_courses[major_courses['name'] == course['name']]
+        if not major_course.empty:
+            times = major_course['time'].iloc[0]
+            selected_course_times.extend(parse_time_range(times))
 
-        # 기존 선택된 과목 추가
-        for course in selected_courses:
-            major_course = major_courses[major_courses['name'] == course['name']]
-            if not major_course.empty:
-                times = major_course['time'].iloc[0]
-                parsed_times = parse_time_range(times)
-                all_times.extend(parsed_times)  # 시간 추가
-                timetable.append({**course, 'confirmed': True})  # 시간표에 추가
+    # 원하는 과목과 카테고리 필터 적용
+    available_courses_desired = [
+        row.to_dict()
+        for desired_course in preferences['desired_courses']
+        for _, row in other_courses[other_courses['name'] == desired_course].iterrows()
+        if is_time_available(parse_time_range(row['time']), preferences['unavailable_times'])
+    ]
+    
+    available_courses_category = [
+        row.to_dict()
+        for category, count in preferences['category_selections'].items() if count > 0
+        for _, row in other_courses[other_courses['category'] == category].iterrows()
+        if is_time_available(parse_time_range(row['time']), preferences['unavailable_times'])
+    ]
+    
+    # 가능한 모든 조합 생성
+    desired_combinations = [
+    combo for combo in product(available_courses_desired, repeat=len(preferences['desired_courses']))
+    if len(set(course['name'] for course in combo)) == len(combo)  # 고유 값(name)으로 중복 체크
+]
 
-        # preferences.desired_courses 처리
-        unique_names_desired = {course['name'] for course in available_courses_desired}
-        desired_courses_count = 0  # desired_courses의 개수
-        for name in unique_names_desired:
-            courses_with_name = [course for course in available_courses_desired if course['name'] == name]
-            selected_course = sample(courses_with_name, 1)[0]  # 랜덤으로 하나 선택
-            parsed_times = parse_time_range(selected_course['time'])
+    category_combinations = [
+        combo for combo in product(available_courses_category, repeat=sum(preferences['category_selections'].values()))
+        if len(set(course['name'] for course in combo)) == len(combo)  # 고유 값(name)으로 중복 체크
+    ]
 
-            # 충돌 여부 검사
-            if all(not time_conflicts(parsed_time, existing_time) for parsed_time in parsed_times for existing_time in all_times):
-                timetable.append({**selected_course, 'source': 'desired'})
-                all_times.extend(parsed_times)  # 새로 추가된 시간도 기록
-                desired_courses_count += 1  # 선택된 desired_course의 개수 증가
+    
+    # 충돌 없는 조합 계산
+    global valid_timetables
+    valid_timetables = []
+    for desired_combo in desired_combinations:
+        for category_combo in category_combinations:
+            timetable = []
+            all_times = selected_course_times.copy()
+            
+            # 선택된 과목 추가
+            timetable.extend([{**course, 'confirmed': True} for course in selected_courses])
+            
+            # 원하는 과목 추가
+            for course in desired_combo:
+                parsed_times = parse_time_range(course['time'])
+                if all(not time_conflicts(parsed_time, existing_time) for parsed_time in parsed_times for existing_time in all_times):
+                    timetable.append({**course, 'source': 'desired'})
+                    all_times.extend(parsed_times)
+            
+            # 카테고리 과목 추가
+            for course in category_combo:
+                parsed_times = parse_time_range(course['time'])
+                if all(not time_conflicts(parsed_time, existing_time) for parsed_time in parsed_times for existing_time in all_times):
+                    timetable.append({**course, 'source': 'category'})
+                    all_times.extend(parsed_times)
+            
+            # 모든 조건이 충족되면 유효한 시간표로 저장
+            if len(timetable) == len(selected_courses) + len(preferences['desired_courses']) + sum(preferences['category_selections'].values()):
+                valid_timetables.append(timetable)
+    
+    if valid_timetables:
+        shuffle(valid_timetables)  # 추가된 부분
+        return render_template('summary.html', timetable=valid_timetables[0], total=len(valid_timetables), index=1)
+    else:
+        flash('충돌 없이 구성 가능한 시간표가 없습니다.')
+        return redirect(url_for('index'))
+    
 
-        # preferences.category_selections 처리
-        category_courses_count = 0  # 선택된 category_courses의 개수
-        for category, count in preferences['category_selections'].items():
-            if count > 0:
-                category_courses = [course for course in available_courses_category if course['category'] == category]
-                
-                # 이름이 중복되지 않도록 고유한 이름을 가진 과목들을 필터링
-                unique_category_courses = []
-                seen_names = set()
-                for course in category_courses:
-                    if course['name'] not in seen_names:
-                        unique_category_courses.append(course)
-                        seen_names.add(course['name'])
-
-                # count만큼 랜덤으로 선택
-                selected_courses_category = sample(unique_category_courses, min(count, len(unique_category_courses)))
-                for course in selected_courses_category:
-                    parsed_times = parse_time_range(course['time'])
-
-                    # 충돌 여부 검사
-                    if all(not time_conflicts(parsed_time, existing_time) for parsed_time in parsed_times for existing_time in all_times):
-                        timetable.append({**course, 'source': 'category'})
-                        all_times.extend(parsed_times)  # 새로 추가된 시간도 기록
-                        category_courses_count += 1  # 선택된 category_course의 개수 증가
-
-        # 조건 검사: selected_courses, desired_courses, category_courses의 개수가 모두 포함되었는지 확인
-        if (len(selected_courses) == sum(course.get('confirmed', False) for course in timetable) and
-            desired_courses_count == len(preferences['desired_courses']) and
-            category_courses_count == sum(preferences['category_selections'].values())):
-            break  # 모든 조건이 만족되면 루프 종료
-
-    return render_template('summary.html', timetable=timetable)
-
-
-
+@app.route('/summary/<int:index>')
+def show_timetable(index):
+    if index < 1 or index > len(valid_timetables):
+        flash('유효하지 않은 시간표입니다.')
+        return redirect(url_for('summary'))
+    return render_template('summary.html', timetable=valid_timetables[index - 1], total=len(valid_timetables), index=index)
 
 if __name__ == '__main__':
     app.run(debug=True)
