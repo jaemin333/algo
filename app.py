@@ -3,8 +3,9 @@ import pandas as pd
 import re
 from datetime import datetime, time
 from flask import redirect, url_for, flash
-from itertools import product
+from itertools import product, combinations, chain
 from random import shuffle
+from datetime import timedelta
 
 app = Flask(__name__)
 
@@ -68,6 +69,50 @@ def is_time_available(course_times, unavailable_times):
                     return False
     return True  # 충돌이 없으면 True 반환
 
+def calculate_time_gap(timetable):
+    """
+    주어진 시간표에서 과목들 간의 시간 차이 합을 계산.
+    """
+    time_ranges = []
+
+    for course in timetable:
+        parsed_times = parse_time_range(course['time'])
+        for day, start, end in parsed_times:
+            time_ranges.append((day, start, end))
+    
+    # 요일별로 정렬
+    time_ranges.sort(key=lambda x: (x[0], x[1]))
+
+    # 인접 시간대 간 차이 계산
+    total_gap = timedelta()
+    for i in range(1, len(time_ranges)):
+        prev_day, prev_end, _ = time_ranges[i - 1]
+        curr_day, curr_start, _ = time_ranges[i]
+
+        # 같은 요일인지 확인 후 시간 차이를 계산
+        if prev_day == curr_day:
+            gap = datetime.combine(datetime.min, curr_start) - datetime.combine(datetime.min, prev_end)
+            if gap > timedelta(0):  # 겹치지 않는 경우만 계산
+                total_gap += gap
+
+    return total_gap.total_seconds()  # 초 단위 반환
+
+
+def get_category_combinations(other_courses, category_selections):
+    """
+    각 카테고리에서 count만큼 선택한 과목 조합을 생성.
+    """
+    all_combinations = []
+    
+    for category, count in category_selections.items():
+        if count > 0:
+            category_courses = other_courses[other_courses['category'] == category]
+            # 각 카테고리에서 count만큼 과목 선택
+            category_combos = list(combinations(category_courses.to_dict(orient='records'), count))
+            all_combinations.append(category_combos)
+    
+    # 가능한 모든 카테고리 조합의 카테고리별 조합 생성
+    return list(product(*all_combinations)) if all_combinations else [()]
 
 # 선택된 과목 저장
 selected_courses = []  # 선택된 과목 저장
@@ -162,13 +207,14 @@ def summary():
     
     # 선택된 과목의 시간표 가져오기
     selected_course_times = []
+
     for course in selected_courses:
         major_course = major_courses[major_courses['name'] == course['name']]
         if not major_course.empty:
             times = major_course['time'].iloc[0]
             selected_course_times.extend(parse_time_range(times))
 
-    # 원하는 과목과 카테고리 필터 적용
+    # 선호 과목 필터링
     available_courses_desired = [
         row.to_dict()
         for desired_course in preferences['desired_courses']
@@ -176,30 +222,22 @@ def summary():
         if is_time_available(parse_time_range(row['time']), preferences['unavailable_times'])
     ]
     
-    available_courses_category = [
-        row.to_dict()
-        for category, count in preferences['category_selections'].items() if count > 0
-        for _, row in other_courses[other_courses['category'] == category].iterrows()
-        if is_time_available(parse_time_range(row['time']), preferences['unavailable_times'])
-    ]
-    
-    # 가능한 모든 조합 생성
-    desired_combinations = [
-    combo for combo in product(available_courses_desired, repeat=len(preferences['desired_courses']))
-    if len(set(course['name'] for course in combo)) == len(combo)  # 고유 값(name)으로 중복 체크
-]
+    # 카테고리 조합 생성
+    category_combinations = get_category_combinations(other_courses, preferences['category_selections'])
 
-    category_combinations = [
-        combo for combo in product(available_courses_category, repeat=sum(preferences['category_selections'].values()))
-        if len(set(course['name'] for course in combo)) == len(combo)  # 고유 값(name)으로 중복 체크
-    ]
-
-    
-    # 충돌 없는 조합 계산
+    # 유효한 시간표 생성
     global valid_timetables
     valid_timetables = []
-    for desired_combo in desired_combinations:
-        for category_combo in category_combinations:
+    for desired_combo in product(available_courses_desired, repeat=len(preferences['desired_courses'])):
+        if len(set(course['name'] for course in desired_combo)) != len(desired_combo):
+            continue
+        
+        for category_combo_group in category_combinations:
+            # `category_combo_group`는 각 카테고리에서 선택된 조합들로 이루어진 리스트입니다.
+            category_combo = list(chain.from_iterable(category_combo_group))  # 리스트 평탄화
+            if len(set(course['name'] for course in category_combo)) != len(category_combo):
+                continue
+            
             timetable = []
             all_times = selected_course_times.copy()
             
@@ -223,14 +261,15 @@ def summary():
             # 모든 조건이 충족되면 유효한 시간표로 저장
             if len(timetable) == len(selected_courses) + len(preferences['desired_courses']) + sum(preferences['category_selections'].values()):
                 valid_timetables.append(timetable)
-    
+
+    # 시간 차이 기준으로 정렬
+    valid_timetables.sort(key=calculate_time_gap)
+
     if valid_timetables:
-        shuffle(valid_timetables)  # 추가된 부분
         return render_template('summary.html', timetable=valid_timetables[0], total=len(valid_timetables), index=1)
     else:
         flash('충돌 없이 구성 가능한 시간표가 없습니다.')
         return redirect(url_for('index'))
-    
 
 @app.route('/summary/<int:index>')
 def show_timetable(index):
