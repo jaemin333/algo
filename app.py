@@ -41,6 +41,8 @@ def parse_time_range(time_str):
         # 요일, 시작 시간, 종료 시간 튜플을 리스트에 추가
         time_ranges.append((day, start_time, end_time))
 
+    
+
     return time_ranges
 
 
@@ -51,23 +53,21 @@ def time_conflicts(time_range1, time_range2):
     day2, start2, end2 = time_range2
 
     # 요일이 겹치고 시간이 겹치는지 확인
-    if day1 == day2:
-        # 시간이 겹치는지 체크
-        if (start1 < end2) and (start2 < end1):
-            return True
-    return False
+    return day1 == day2 and not (end1 <= start2 or end2 <= start1)
 
 # 불가능한 시간대와 과목 시간대 비교 함수
 def is_time_available(course_times, unavailable_times):
+    """
+    과목 시간(course_times)이 모든 불가능한 시간대(unavailable_times)와 충돌하지 않는지 확인
+    """
     for unavailable_time in unavailable_times:
-        unavailable_time_range = parse_time_range(unavailable_time)  # unavailable_time을 파싱
-        
-        # 각 과목 시간대와 비교하여 충돌 여부를 체크
-        for course_time in course_times:
-            for unavailable_time_single in unavailable_time_range:
-                if time_conflicts(course_time, unavailable_time_single):  # 충돌이 있으면 False 반환
+        unavailable_time_ranges = parse_time_range(unavailable_time)  # 파싱된 불가능한 시간대
+        for unavailable_range in unavailable_time_ranges:
+            for course_time in course_times:
+                if time_conflicts(course_time, unavailable_range):  # 하나라도 겹치면 False 반환
                     return False
-    return True  # 충돌이 없으면 True 반환
+    return True  # 전혀 겹치지 않으면 True 반환
+
 
 def calculate_time_gap(timetable):
     """
@@ -176,54 +176,27 @@ def summary():
             selected_course_times.extend(parse_time_range(times))
     
     # preferences.desired_courses에 해당하는 other.CSV에서 시간대 가져오기
-    available_courses_desired = []
-    for desired_course in preferences['desired_courses']:
-        filtered_courses = other_courses[other_courses['name'] == desired_course]
-        if not filtered_courses.empty:
-            for _, row in filtered_courses.iterrows():
-                times = row['time']
-                course_times = parse_time_range(times)
-                if is_time_available(course_times, preferences['unavailable_times']):
-                    available_courses_desired.append(row.to_dict())
+    available_courses_desired = [
+    row.to_dict()
+    for desired_course in preferences['desired_courses']
+    for _, row in other_courses[other_courses['name'] == desired_course].iterrows()
+    if is_time_available(parse_time_range(row['time']), preferences['unavailable_times'])
+]
     
-    # preferences.category_selections에 해당하는 category 필터링
+
+# 카테고리 과목 필터링
     available_courses_category = []
     for category, count in preferences['category_selections'].items():
-        if count == 0:
-            continue
+        if count > 0:
+            category_courses = other_courses[other_courses['category'] == category]
+            for _, row in category_courses.iterrows():
+                if is_time_available(parse_time_range(row['time']), preferences['unavailable_times']):
+                    available_courses_category.append(row.to_dict())
         
-        category_courses = other_courses[other_courses['category'] == category]
-        for _, row in category_courses.iterrows():
-            times = row['time']
-            course_times = parse_time_range(times)
-            if is_time_available(course_times, preferences['unavailable_times']):
-                available_courses_category.append(row.to_dict())
-
-    # 시간표 생성
-
-    # 선택된 과목에 해당하는 major.CSV에서 시간대 가져오기
-  
-
-    
-    # 선택된 과목의 시간표 가져오기
-    selected_course_times = []
-
-    for course in selected_courses:
-        major_course = major_courses[major_courses['name'] == course['name']]
-        if not major_course.empty:
-            times = major_course['time'].iloc[0]
-            selected_course_times.extend(parse_time_range(times))
-
-    # 선호 과목 필터링
-    available_courses_desired = [
-        row.to_dict()
-        for desired_course in preferences['desired_courses']
-        for _, row in other_courses[other_courses['name'] == desired_course].iterrows()
-        if is_time_available(parse_time_range(row['time']), preferences['unavailable_times'])
-    ]
-    
+    print(available_courses_category)
     # 카테고리 조합 생성
-    category_combinations = get_category_combinations(other_courses, preferences['category_selections'])
+    other_courses2 = pd.DataFrame(available_courses_category)
+    category_combinations = get_category_combinations(other_courses2, preferences['category_selections'])
 
     # 유효한 시간표 생성
     global valid_timetables
@@ -264,6 +237,15 @@ def summary():
 
     # 시간 차이 기준으로 정렬
     valid_timetables.sort(key=calculate_time_gap)
+
+    preferences = {
+    'unavailable_times': ['월09:00-21:00']
+}
+
+    course_times = parse_time_range('화13:30-14:45【33301】 목12:00-13:15【33301】')
+    result = is_time_available(course_times, preferences['unavailable_times'])
+    print("Is time available:", result)
+
 
     if valid_timetables:
         return render_template('summary.html', timetable=valid_timetables[0], total=len(valid_timetables), index=1)
