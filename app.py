@@ -1,14 +1,148 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session
+from flask_session import Session
 import pandas as pd
+import logging
 import re
+from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, time
-from flask import redirect, url_for, flash
 from itertools import product, combinations, chain
-from random import shuffle
+from flask import redirect, url_for, flash
+from flask_cors import CORS
+from flask import Flask, session
 from datetime import timedelta
+from random import shuffle
 
+            
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'  # SQLite DB 경로
+app.config['SESSION_TYPE'] = 'filesystem'  # 또는 'redis', 'mongodb' 등
+app.config['SESSION_FILE_DIR'] = '/tmp/flask_sessions'  # 쓰기 권한이 있는 경로 사용
+app.secret_key = 'your_secret_key'
 
+CORS(app)
+Session(app)
+
+# Flask-SQLAlchemy 초기화
+db = SQLAlchemy(app)
+
+# 기본 로그 설정
+logging.basicConfig(level=logging.INFO)
+
+# 사용자 정보 모델 (User 모델)
+class User(db.Model):
+    id = db.Column(db.String(50), primary_key=True)  # 사용자 ID (로그인용)
+    pw = db.Column(db.String(100), nullable=False)  # 비밀번호
+    name = db.Column(db.String(100), nullable=False)  # 이름
+    grade = db.Column(db.String(10))  # 학년
+    studentNumber = db.Column(db.String(20))  # 학번
+    timetable = db.relationship('Timetable', backref='user', lazy=True)  # 시간표와의 관계
+
+# 시간표 모델 (Timetable 모델)
+class Timetable(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    course_name = db.Column(db.String(100), nullable=False)  # 과목명
+    course_time = db.Column(db.String(100), nullable=False)  # 시간
+    user_id = db.Column(db.String(50), db.ForeignKey('user.id'), nullable=False)  # 사용자와 연결
+
+# 데이터베이스 초기화
+@app.before_request
+def create_tables():
+    db.create_all()
+    print_all_data()  # 서버 시작 시, DB에 있는 모든 사용자 정보와 시간표 출력
+
+def print_all_data():
+    """DB에서 사용자 정보와 시간표 정보를 출력"""
+    print("현재 DB에 저장된 사용자 정보와 시간표:")
+    
+    # 사용자 정보 출력
+    users = User.query.all()  # 모든 사용자 정보 조회
+    for user in users:
+        print(f"ID: {user.id}, Name: {user.name}, Grade: {user.grade}, Student Number: {user.studentNumber}")
+        
+        # 해당 사용자의 시간표 정보 출력
+        timetables = Timetable.query.filter_by(user_id=user.id).all()
+        for timetable in timetables:
+            print(f"    Course: {timetable.course_name}, Time: {timetable.course_time}")
+
+@app.route('/signup', methods=['POST'])
+def signup():
+    user_data = request.get_json()
+    
+    # 아이디 중복 확인
+    existing_user = User.query.filter_by(id=user_data['id']).first()
+    if existing_user:
+        return jsonify({"status": "error", "message": "아이디가 이미 존재합니다."})
+    
+    # 새로운 사용자 추가
+    new_user = User(
+        id=user_data['id'],
+        pw=user_data['pw'],
+        name=user_data['name'],
+        grade=user_data['grade'],
+        studentNumber=user_data['studentNumber']
+    )
+    db.session.add(new_user)
+    db.session.commit()
+
+    logging.info(f"새로운 회원가입: {user_data}")  # 로그에 출력
+    return jsonify({"status": "success", "message": "회원가입 성공"})
+
+@app.route('/login', methods=['POST'])
+def login():
+    login_data = request.get_json()
+    user = User.query.filter_by(id=login_data['id'], pw=login_data['pw']).first()
+    
+    if user:
+        session['user'] = {"id": user.id, "name": user.name}
+        logging.info(f"로그인 성공: {user.name}")  # 로그에 출력
+        return jsonify({"status": "success", "user": {"id": user.id, "name": user.name}})
+    
+    return jsonify({"status": "error", "message": "아이디 또는 비밀번호가 틀렸습니다."})
+
+@app.route('/save_timetable', methods=['POST'])
+def save_timetable():
+    if 'user' not in session:
+        return jsonify({'status': 'error', 'message': '로그인 정보가 없습니다.'})
+    
+    user_id = session['user']['id']
+    timetable_data = request.get_json()
+
+    # 기존 시간표 삭제 (새로 저장)
+    existing_timetable = Timetable.query.filter_by(user_id=user_id).all()
+    for course in existing_timetable:
+        db.session.delete(course)
+    
+    # 새로운 시간표 추가
+    for course in timetable_data:
+        new_course = Timetable(course_name=course['name'], course_time=course['time'], user_id=user_id)
+        db.session.add(new_course)
+    
+    db.session.commit()
+
+    logging.info(f"시간표 저장: 사용자 ID - {user_id}, 시간표 데이터 - {timetable_data}")  # 로그에 출력
+
+    return jsonify({'status': 'success', 'message': '시간표가 저장되었습니다.'})
+
+@app.route('/get_user_timetable', methods=['GET'])
+def get_user_timetable():
+    if 'user' not in session:
+        return jsonify({'status': 'error', 'message': '로그인 정보가 없습니다.'})
+    
+    user_id = session['user']['id']
+    timetable = Timetable.query.filter_by(user_id=user_id).all()
+
+    timetable_data = [{"name": course.course_name, "time": course.course_time} for course in timetable]
+
+    logging.info(f"사용자 ID - {user_id}의 시간표 요청: 시간표 데이터 - {timetable_data}")  # 로그에 출력
+
+    return jsonify({'timetable': timetable_data})
+
+# 시간표 초기화
+@app.route('/reset-timetable', methods=['POST'])
+def reset_timetable():
+    global timetable
+    timetable = [] 
+    
 # CSV 파일 로드
 def load_courses():
     major_courses_path = 'major.CSV'
@@ -41,8 +175,6 @@ def parse_time_range(time_str):
         # 요일, 시작 시간, 종료 시간 튜플을 리스트에 추가
         time_ranges.append((day, start_time, end_time))
 
-    
-
     return time_ranges
 
 
@@ -55,6 +187,7 @@ def time_conflicts(time_range1, time_range2):
     # 요일이 겹치고 시간이 겹치는지 확인
     return day1 == day2 and not (end1 <= start2 or end2 <= start1)
 
+
 # 불가능한 시간대와 과목 시간대 비교 함수
 def is_time_available(course_times, unavailable_times):
     """
@@ -62,6 +195,7 @@ def is_time_available(course_times, unavailable_times):
     """
     for unavailable_time in unavailable_times:
         unavailable_time_ranges = parse_time_range(unavailable_time)  # 파싱된 불가능한 시간대
+        print("Checking time conflict for:", unavailable_time_ranges)
         for unavailable_range in unavailable_time_ranges:
             for course_time in course_times:
                 if time_conflicts(course_time, unavailable_range):  # 하나라도 겹치면 False 반환
@@ -96,7 +230,6 @@ def calculate_time_gap(timetable):
                 total_gap += gap
 
     return total_gap.total_seconds()  # 초 단위 반환
-
 
 def get_category_combinations(other_courses, category_selections):
     """
@@ -135,9 +268,6 @@ def search_courses():
         'other_courses': other_courses_list
     })
 
-@app.route('/')
-def index():
-    return render_template('index.html')
 
 @app.route('/add_course', methods=['POST'])
 def add_course():
@@ -145,26 +275,50 @@ def add_course():
     selected_courses.append(course)
     return jsonify({'status': 'success'})
 
-@app.route('/next_step')
-def next_step():
-    return render_template('next.html', courses=selected_courses)
+@app.route('/remove_course', methods=['POST'])
+def remove_course():
+    course_to_remove = request.get_json()
+    course_name = course_to_remove.get('name')
+    
+    # selected_courses에서 해당 과목을 찾아서 제거
+    global selected_courses
+    selected_courses = [course for course in selected_courses if course['name'] != course_name]
+    
+    return jsonify({'status': 'success'})
+
+@app.route('/get_selected_courses', methods=['GET'])
+def get_selected_courses():
+    # 현재 서버에 저장된 selected_courses를 반환합니다.
+    return jsonify({'selected_courses': selected_courses})
 
 @app.route('/submit_preferences', methods=['POST'])
 def submit_preferences():
-    global preferences
     data = request.get_json()
-    preferences['desired_courses'] = data.get('desired_courses', [])
-    preferences['category_selections'] = data.get('category_selections', {})
-    preferences['unavailable_times'] = data.get('unavailable_times', [])
+    session['preferences'] = {
+        'desired_courses': data.get('desired_courses', []),
+        'category_selections': data.get('category_selections', {}),
+        'unavailable_times': data.get('unavailable_times', [])
+    }
     
     print("User Preferences:", preferences)  # 디버그용 출력
     return jsonify({'status': 'success'})
 
 from random import sample
 
-@app.route('/summary')
+@app.route('/')
+def index():
+    return "Welcome to the Index Page!"
+
+@app.route('/summary', methods=['GET'])
 def summary():
-    global preferences
+    preferences = session.get('preferences', {
+        'desired_courses': [],
+        'category_selections': {},
+        'unavailable_times': []
+    })
+
+    print("Preferences State:", preferences)  # 디버그 출력
+    index = request.args.get('page', 1, type=int)  # 페이지 번호 가져오기
     major_courses, other_courses = load_courses()
     
     # 선택된 과목에 해당하는 major.CSV에서 시간대 가져오기
@@ -236,22 +390,17 @@ def summary():
                 valid_timetables.append(timetable)
 
     # 시간 차이 기준으로 정렬
-    valid_timetables.sort(key=calculate_time_gap)
+    valid_timetables_copy = valid_timetables[:]
+    valid_timetables_copy.sort(key=calculate_time_gap)
 
-    preferences = {
-    'unavailable_times': ['월09:00-21:00']
-}
-
-    course_times = parse_time_range('화13:30-14:45【33301】 목12:00-13:15【33301】')
-    result = is_time_available(course_times, preferences['unavailable_times'])
-    print("Is time available:", result)
 
 
     if valid_timetables:
-        return render_template('summary.html', timetable=valid_timetables[0], total=len(valid_timetables), index=1)
+        return jsonify({'timetable': valid_timetables[index-1], 'total': len(valid_timetables), 'index': index})
     else:
         flash('충돌 없이 구성 가능한 시간표가 없습니다.')
         return redirect(url_for('index'))
+
 
 @app.route('/summary/<int:index>')
 def show_timetable(index):
@@ -262,3 +411,5 @@ def show_timetable(index):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
