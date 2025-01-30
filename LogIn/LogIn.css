@@ -1,0 +1,102 @@
+.LmainContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+/* 네비게이션 바 스타일 */
+.navbar {
+  font-family: Georgia, "Times New Roman", Times, serif;
+  width: 98%; /* 네비게이션 바의 가로 폭을 90%로 설정 */
+  position: fixed;
+  top: 3px; /* 화면 상단에 고정 */
+  left: 50%; /* 화면의 중앙으로 이동 */
+  transform: translateX(-50%); /* 정확히 중앙에 오도록 조정 */
+  background-color: #fafafa;
+  color: black;
+  padding: 20px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10; /* 다른 콘텐츠 위에 표시되도록 설정 */
+  border-radius: 15px; /* 모서리 둥글게 설정 */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* 사방으로 그림자 추가 */
+}
+
+.navbar h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.navbar h1:hover {
+  cursor: pointer;
+}
+
+/* 콘텐츠가 네비게이션 바 아래에 위치하도록 여백을 추가 */
+.LmainContent {
+  width: 400px;
+  margin-top: 50px;
+  text-align: center;
+}
+
+.LmainContent h2 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.inputField {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.links {
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.links a {
+  color: #333;
+  text-decoration: none;
+  margin: 0 5px;
+}
+
+.links a:hover {
+  text-decoration: underline;
+}
+
+.loginButton,
+.signupButton {
+  width: 100%;
+  padding: 15px;
+  font-size: 18px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.loginButton {
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #ccc;
+}
+
+.signupButton {
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #ccc;
+}
+
+.loginButton:hover {
+  background-color: #00bfff42;
+}
+
+.signupButton:hover {
+  background-color: #00bfff42;
+}

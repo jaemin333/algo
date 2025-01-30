@@ -1,0 +1,70 @@
+.SmainContainer {
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* 전체 화면 높이 차지 */
+  margin: 0;
+  background: linear-gradient(
+    to right,
+    white,
+    #00bfff42
+  ); /* 왼쪽은 흰색, 오른쪽은 하늘색 그라데이션 */
+}
+
+.SmainContent {
+  margin-top: 50px;
+  display: flex;
+  flex-grow: 1; /* 남은 공간 모두 차지 */
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box; /* 패딩 포함 크기 계산 */
+}
+
+.timetable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  height: 100vh;
+}
+
+.timetable th,
+.timetable td {
+  border: 1px solid #ddd;
+  text-align: center;
+  font-size: 10px;
+}
+
+.timetable th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+.timetable td {
+  height: 10px;
+}
+
+.timetable .filled {
+  color: white;
+  font-weight: bold;
+}
+
+.SleftSection {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 80%;
+  text-align: center;
+}
+
+.leftSection h1 {
+  text-align: left;
+}
+
+.SrightSection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding-right: 190px;
+}

@@ -1,0 +1,105 @@
+@import "animate.css";
+@import url("hover.css");
+
+.Special.animate__animated.animate__rubberBand {
+  animation-duration: 2s;
+  display: inline-block; /* 애니메이션을 위해 필요할 수 있음 */
+  font-size: 40px;
+  font-family: Georgia, "Times New Roman", Times, serif;
+}
+
+.hvr-sweep-to-right,
+.hvr-sweep-to-right:before,
+.hvr-sweep-to-right:hover,
+.hvr-sweep-to-right:focus,
+.hvr-sweep-to-right:active,
+.hvr-sweep-to-right:hover:before,
+.hvr-sweep-to-right:focus:before,
+.hvr-sweep-to-right:active:before {
+  border-radius: 5px;
+}
+
+.mainContainer {
+  height: 100vh;
+}
+
+/* 네비게이션 바 스타일 */
+.navbar {
+  font-family: Georgia, "Times New Roman", Times, serif;
+  width: 98%; /* 네비게이션 바의 가로 폭을 90%로 설정 */
+  position: fixed;
+  top: 3px; /* 화면 상단에 고정 */
+  left: 50%; /* 화면의 중앙으로 이동 */
+  transform: translateX(-50%); /* 정확히 중앙에 오도록 조정 */
+  background-color: #fafafa;
+  color: black;
+  padding: 20px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10; /* 다른 콘텐츠 위에 표시되도록 설정 */
+  border-radius: 15px; /* 모서리 둥글게 설정 */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* 사방으로 그림자 추가 */
+}
+
+.navbar h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.navbar h1:hover {
+  cursor: pointer;
+}
+
+/* 콘텐츠가 네비게이션 바 아래에 위치하도록 여백을 추가 */
+.mainContent {
+  background: linear-gradient(
+    to right,
+    white,
+    #00bfff42 /*cef6f5*/
+  ); /* 왼쪽은 흰색, 오른쪽은 하늘색 그라데이션 */
+  height: 100vh; /* 화면 전체 높이를 채우도록 설정 */
+}
+
+.fullscreenContainer {
+  display: flex;
+  height: 100vh;
+}
+
+.leftSection {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+  text-align: center;
+}
+
+.leftSection h1 {
+  text-align: left;
+}
+
+button {
+  margin: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  background-color: #00bfff;
+  color: white;
+  border-radius: 5px;
+  width: 150px;
+}
+
+.rightSection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+}
+
+.rightSection img {
+  height: 40%;
+  object-fit: cover;
+}

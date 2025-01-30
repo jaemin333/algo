@@ -1,0 +1,144 @@
+/* Container styling */
+.SmainContainer {
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.navbar {
+  font-family: Georgia, "Times New Roman", Times, serif;
+  width: 98%; /* 네비게이션 바의 가로 폭을 90%로 설정 */
+  position: fixed;
+  top: 3px; /* 화면 상단에 고정 */
+  left: 50%; /* 화면의 중앙으로 이동 */
+  transform: translateX(-50%); /* 정확히 중앙에 오도록 조정 */
+  background-color: #fafafa;
+  color: black;
+  padding: 20px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10; /* 다른 콘텐츠 위에 표시되도록 설정 */
+  border-radius: 15px; /* 모서리 둥글게 설정 */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* 사방으로 그림자 추가 */
+}
+
+.navbar h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.navbar h1:hover {
+  cursor: pointer;
+}
+
+/* Main content styling */
+.SmainContent {
+  margin-top: 50px;
+  width: 400px;
+  max-width: 100%;
+  padding: 20px;
+}
+
+.title {
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.signup-form label {
+  font-size: 14px;
+  color: #333;
+}
+
+.input-with-button-left {
+  width: 100%;
+  display: flex;
+  flex: none;
+  align-items: center;
+}
+
+.input-with-button {
+  display: flex;
+  position: relative;
+}
+.input-with-button-left input {
+  flex: 1; /* Allow input to take up remaining space */
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 4px 0 0 4px; /* Rounded corners for left side */
+  border-right: none; /* Remove right border */
+  box-sizing: border-box;
+}
+
+.id-check-message {
+  margin-top: 15px;
+  margin-left: 10px; /* 버튼과 메시지 간격 */
+  color: red; /* 메시지 강조 색상 */
+  font-size: 14px; /* 메시지 폰트 크기 */
+  white-space: nowrap; /* 메시지가 줄바꿈되지 않도록 설정 */
+}
+
+.check-button,
+.verify-button {
+  padding: 8px 12px;
+  background-color: #00bfff;
+  color: #fff;
+  border: none;
+  border-radius: 4px; /* Rounded corners for right side */
+  cursor: pointer;
+}
+
+.signup-form input[type="text"],
+.signup-form input[type="password"],
+.signup-form input[type="email"],
+.signup-form input[type="tel"] {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.gender-options {
+  display: flex;
+  gap: 10px;
+}
+
+.gender-options label {
+  font-size: 14px;
+}
+
+.birthdate input {
+  width: 100px;
+  margin-right: 5px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.submit-button {
+  margin-top: 20px;
+  padding: 10px;
+  font-size: 16px;
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.submit-button:hover {
+  background-color: #00bfff;
+}

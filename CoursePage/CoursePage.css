@@ -1,0 +1,279 @@
+@import url("hover.css");
+
+.CmainContainer {
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* 전체 화면 높이 차지 */
+  margin: 0;
+  background: linear-gradient(
+    to right,
+    white,
+    #00bfff42
+  ); /* 왼쪽은 흰색, 오른쪽은 하늘색 그라데이션 */
+  height: 100vh; /* 화면 전체 높이를 채우도록 설정 */
+}
+
+.navbar {
+  font-family: Georgia, "Times New Roman", Times, serif;
+  width: 98%; /* 네비게이션 바의 가로 폭을 90%로 설정 */
+  position: fixed;
+  top: 3px; /* 화면 상단에 고정 */
+  left: 50%; /* 화면의 중앙으로 이동 */
+  transform: translateX(-50%); /* 정확히 중앙에 오도록 조정 */
+  background-color: #fafafa;
+  color: black;
+  padding: 20px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10; /* 다른 콘텐츠 위에 표시되도록 설정 */
+  border-radius: 15px; /* 모서리 둥글게 설정 */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* 사방으로 그림자 추가 */
+}
+
+.navbar h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.navbar h1:hover {
+  cursor: pointer;
+}
+
+.CmainContent {
+  margin-top: 50px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* 남은 공간 모두 차지 */
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box; /* 패딩 포함 크기 계산 */
+}
+
+.layout {
+  display: flex;
+  flex-grow: 1; /* 남은 세로 공간 모두 차지 */
+  width: 100%;
+  gap: 20px; /* 요소 간 간격 추가 */
+  margin-bottom: 80px; /* 버튼 높이만큼 여유 공간 추가 */
+}
+
+/* 탭 메뉴 스타일 */
+.tabs-container {
+  display: flex;
+  flex-direction: column;
+  width: 200px;
+  background-color: #f9f9f9;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 10px;
+  box-sizing: border-box;
+  height: 100%; /* 컨테이너가 전체 높이 차지 */
+  gap: 10px; /* 버튼 간격 추가 */
+}
+
+.tab-content {
+  display: flex;
+  flex-grow: 1;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.15);
+  overflow-x: auto; /* 가로 스크롤 활성화 */
+  white-space: nowrap;
+  box-sizing: border-box;
+  width: 500px;
+}
+
+.course-list {
+  display: flex; /* 내부 과목을 가로로 배치 */
+  gap: 20px; /* 과목 간 간격 추가 */
+  flex-wrap: nowrap; /* 한 줄로 유지 (줄바꿈 방지) */
+  overflow-x: auto; /* 가로 스크롤 가능 */
+  overflow: visible;
+}
+
+.courses-list {
+  display: flex;
+  flex-direction: column; /* 가로 정렬 */
+  overflow-x: auto; /* 가로 스크롤 활성화 */
+  overflow: visible;
+  max-width: 100%; /* 부모 컨테이너 크기 제한 */
+  box-sizing: border-box;
+  gap: 20px; /* 항목 간 간격 */
+  white-space: nowrap; /* 줄바꿈 방지 */
+}
+
+.courses-list ul {
+  align-items: center;
+  display: flex; /* 가로 정렬 */
+  flex-wrap: nowrap; /* 줄바꿈 방지 */
+  gap: 20px; /* 항목 간 간격 */
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  padding-top: 45px;
+}
+
+.courses-list ul li {
+  flex: 0 0 auto; /* 고정 크기로 설정 */
+  min-width: 250px; /* 최소 크기 설정 */
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.selected-courses {
+  display: flex;
+  flex-direction: column; /* 가로 정렬 */
+  overflow-x: auto; /* 가로 스크롤 활성화 */
+  max-width: 100%; /* 부모 컨테이너 크기 제한 */
+  box-sizing: border-box;
+  gap: 20px; /* 항목 간 간격 */
+  white-space: nowrap; /* 줄바꿈 방지 */
+}
+
+.selected-courses ul {
+  align-items: center;
+  display: flex; /* 가로 정렬 */
+  flex-wrap: nowrap; /* 줄바꿈 방지 */
+  gap: 20px; /* 항목 간 간격 */
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  padding-top: 45px;
+}
+
+.selected-courses ul li {
+  flex: 0 0 auto; /* 고정 크기로 설정 */
+  min-width: 250px; /* 최소 크기 설정 */
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.selected-course {
+  flex: 0 0 auto; /* 고정 크기로 유지 */
+  display: inline-block;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  white-space: normal; /* 텍스트 줄바꿈 허용 */
+  text-align: left;
+  overflow-x: auto;
+}
+
+.course-item {
+  flex: 0 0 auto; /* 고정 크기 요소로 설정 */
+  display: inline-block; /* 가로 배치 */
+  background-color: #f9f9f9;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  white-space: normal; /* 텍스트 줄바꿈 허용 */
+  width: 250px; /* 과목 박스 고정 너비 */
+  cursor: pointer;
+  -webkit-transform: perspective(1px) translateZ(0);
+  transform: perspective(1px) translateZ(0);
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0);
+  -webkit-transition-duration: 0.3s;
+  transition-duration: 0.3s;
+  -webkit-transition-property: box-shadow, transform;
+  transition-property: box-shadow, transform;
+}
+
+.course-item:hover {
+  transform: scale(1.05) !important;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2) !important;
+}
+
+.tab {
+  flex: 1; /* 버튼이 동일한 비율로 공간을 차지 */
+  cursor: pointer;
+  padding: 15px;
+  border-radius: 5px;
+  background-color: #00aaff2a;
+  text-align: center;
+  box-sizing: border-box;
+  color: black;
+}
+
+.tab:hover {
+  background-color: #00aaff;
+}
+
+.tab.active {
+  background-color: #00aaff;
+  font-weight: bold;
+  color: white;
+}
+
+/* 검색창 스타일 */
+.SearchArea {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.SearchArea input {
+  width: 70%; /* 검색창 너비 */
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 5px 0 0 5px;
+  box-sizing: border-box;
+}
+
+.SearchArea button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #00aaff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.SearchArea button:hover {
+  background-color: #007acc;
+}
+
+/* "다음 단계" 버튼 중앙 고정 스타일 */
+.next-button-container {
+  position: fixed; /* 화면에 고정 */
+  bottom: 20px; /* 화면 하단에서 20px 위로 */
+  left: 50%; /* 화면 가로의 정중앙 */
+  transform: translateX(-50%); /* 버튼을 정중앙으로 정렬 */
+  z-index: 1000; /* 다른 요소 위로 오게 설정 */
+}
+
+.next-button-container button {
+  padding: 15px 30px;
+  font-size: 16px;
+  font-weight: bold;
+  background-color: #00aaff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* 버튼에 약간의 그림자 추가 */
+}
+
+.next-button-container button:hover {
+  background-color: #007acc;
+}

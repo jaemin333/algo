@@ -1,0 +1,102 @@
+.ChooseMainContainer {
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* 전체 화면 높이 차지 */
+  margin: 0;
+  background: linear-gradient(
+    to right,
+    white,
+    #00bfff42
+  ); /* 왼쪽은 흰색, 오른쪽은 하늘색 그라데이션 */
+  height: 100vh; /* 화면 전체 높이를 채우도록 설정 */
+}
+
+.ChooseMainContent {
+  margin-top: 210px;
+}
+
+.ChooseLayout {
+  display: flex;
+  flex-grow: 1; /* 남은 세로 공간 모두 차지 */
+  width: 100%;
+  gap: 100px; /* 요소 간 간격 추가 */
+}
+
+.ChooseLeftContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 50%;
+  text-align: center;
+  background-color: white;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  box-sizing: border-box;
+  height: 100%; /* 컨테이너가 전체 높이 차지 */
+  gap: 10px; /* 버튼 간격 추가 */
+  margin-left: 150px;
+  cursor: pointer;
+}
+
+.ChooseRightContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 50%;
+  text-align: center;
+  background-color: white;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  box-sizing: border-box;
+  height: 100%; /* 컨테이너가 전체 높이 차지 */
+  gap: 10px; /* 버튼 간격 추가 */
+  margin-right: 150px;
+}
+
+/* 컨테이너 호버 상태를 정의 */
+.ChooseLayout:hover .ChooseLeftContent,
+.ChooseLayout:hover .ChooseRightContent {
+  transition: transform 0.3s ease, width 0.3s ease;
+}
+
+/* LeftContent에 마우스 호버 시 효과 */
+.ChooseLeftContent:hover {
+  transform: scale(1.1); /* 크기 확대 */
+  width: 60%; /* 넓이 증가 */
+}
+
+.ChooseRightContent:hover {
+  transform: scale(1.1); /* 크기 확대 */
+  width: 60%; /* 넓이 증가 */
+}
+
+/* 반대편 요소는 축소 */
+.ChooseLeftContent:hover ~ .ChooseRightContent {
+  transform: scale(0.9); /* 크기 축소 */
+  width: 40%; /* 넓이 감소 */
+}
+
+.ChooseRightContent:hover ~ .ChooseLeftContent {
+  transform: scale(0.9); /* 크기 축소 */
+  width: 40%; /* 넓이 감소 */
+}
+
+.ChooseImg {
+  width: 30%;
+}
+
+.bottom {
+  /*#f5f5f5*/
+  text-align: center;
+  background-color: #00aaff37; /* 제목 영역 배경을 구분되게 설정 */
+  color: #333; /* 텍스트 색상 */
+  width: 100%; /* 가로 크기를 부모 요소에 맞춤 */
+  box-sizing: border-box; /* 패딩 포함하여 크기 계산 */
+  border-radius: 0 0 8px 8px;
+}
+
+.inner-content {
+  margin-top: 50px;
+  margin-bottom: 50px;
+}
